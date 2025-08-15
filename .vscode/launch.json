@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Client",
+            "preLaunchTask": "build client",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/ChatKokaClient",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb"
+        },
+        {
+            "name": "Debug Server",
+            "preLaunchTask": "build server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/ChatKokaServer",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb"
+        }
+    ]
+}
