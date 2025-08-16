@@ -6,7 +6,7 @@
 #include <thread>
 #include <chrono>
 
-class chatEnv {
+class serverEnv {
     private: 
         sf::TcpListener server;
         std::string ip;
@@ -14,7 +14,7 @@ class chatEnv {
         sf::TcpSocket remoteClient;
         bool isBound;
     public:
-        chatEnv();
+        serverEnv();
         void bind(std::string ip, int port);
         void accept();
         void update();
@@ -22,15 +22,15 @@ class chatEnv {
         bool bindState();
 };
 
-chatEnv::chatEnv() {
+serverEnv::serverEnv() {
     bool isBound = false;
 }
 
-bool chatEnv::bindState() {
+bool serverEnv::bindState() {
     return isBound;
 }
 
-void chatEnv::bind(std::string ip, int port) {
+void serverEnv::bind(std::string ip, int port) {
     std::cout << "### Starting ChatKokaServer" << std::endl;
     if (server.listen(port, ip) != sf::TcpListener::Done) {
         std::cout << "!!! Failed to bind to port" << std::endl;
@@ -41,7 +41,7 @@ void chatEnv::bind(std::string ip, int port) {
     }
 }
 
-void chatEnv::accept() {
+void serverEnv::accept() {
     if (server.accept(remoteClient) != sf::TcpListener::Done) {
         std::cout << "!!! Failed to accept client" << std::endl;
     } else {
@@ -49,13 +49,19 @@ void chatEnv::accept() {
     }
 }
 
-void chatEnv::update() {
-    
+void serverEnv::update() {
+    sf::Packet chatPacket;
+    std::string message;
+    std::cout << "hi "<<  std::endl;
+    std::cin >> message;
+    chatPacket << message;
+    remoteClient.send(chatPacket);
+    chatPacket.clear();
 }
 
 int main() {
 
-    chatEnv server;
+    serverEnv server;
     server.bind("127.0.0.1",42069);
     while (server.bindState() == true) {
         server.accept();

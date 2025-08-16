@@ -1,5 +1,6 @@
 #include "SFML/Network.hpp"
 #include "SFML/Window.hpp"
+#include "SFML/Graphics.hpp"
 
 #include <iostream>
 #include <string>
@@ -9,31 +10,85 @@
 
 #include "user.h"
 
-void sendMessage() {
-    std::string input;
-    std::cout << "You said: ";
-    std::cin >> input;
+class ClientEnv {
+    private:
+        sf::TcpSocket socket;
+        std::string ip;
+        int port;
+        void ReceiveMessage();
+    public:
+        bool connectedToServer;
+        User user;
+        ClientEnv();
+        void connectServer();
+        void initNetworkStream();
+};
+
+ClientEnv::ClientEnv() {
+    ip = "127.0.0.1";
+    port = 42069; 
+    bool connected = false;
 }
 
-void receieveMessage() {
+void ClientEnv::connectServer() {
+    std::cout << "### Starting ChatKokaClient" << std::endl;
+    std::cout << "### Connecting to server" << std::endl;
+    while (socket.connect(ip, port) != sf::Socket::Status::Done) {
+        std::cout << "!!! Retrying connection" << std::endl;
+        socket.connect(ip, port);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    connectedToServer = true;
+}
 
+void ClientEnv::initNetworkStream() {
+    if (connectedToServer) {
+        std::thread worker(&ClientEnv::ReceiveMessage, this);
+        worker.detach();
+    } else {
+        std::cout << "!!! Stopped Network stream" << std::endl;
+        return;
+    }
+}
+
+void ClientEnv::ReceiveMessage() {
+    while(connectedToServer) {
+        sf::Packet chatPacket;
+        socket.receive(chatPacket);
+        std::string message;
+        chatPacket >> message;
+        std::cout << message << std::endl;
+        chatPacket.clear();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::cout << "!!! Stopped receieving messages" << std::endl;
+    }
+    std::cout << "!!! Stopped receieving messages" << std::endl;
+    return;
 }
 
 int main() {
 
-    std::cout << "### Starting ChatKokaClient" << std::endl;
-
-    std::cout << "### Connecting to server" << std::endl;
-    sf::TcpSocket client;
-
-    while (client.connect("127.0.0.1", 42069) != sf::Socket::Status::Done) {
-        std::cout << "!!! Retrying connection" << std::endl;
-        client.connect("127.0.0.1", 42069);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+    ClientEnv env;
+    env.connectServer();
+    env.initNetworkStream();
+    env.user.setDisplayName();
+    while(env.connectedToServer) {
+        
     }
-
-    User primaryUser;
-    primaryUser.setDisplayName();
-
+    std::cout << "!!! Closed" << std::endl;
     return 0;
 }
+
+
+/*
+class inputHandler {
+    private:
+        
+
+    public:
+        void update();
+};
+
+void inputHandler::update() {
+
+}*/
